@@ -1,5 +1,17 @@
 {
   "dependencies": {
     "express": "^4.19.2"
-  }
+  },
+  "name": "student-records",
+  "version": "1.0.0",
+  "description": "An API for creating and updating student records.",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
