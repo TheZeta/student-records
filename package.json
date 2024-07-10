@@ -6,10 +6,12 @@
   "version": "1.0.0",
   "description": "An API for creating and updating student records.",
   "main": "index.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "newman": "^6.1.3"
+  },
   "scripts": {
     "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "newman run postman/collections/Initial_Collection.postman_collection.json -e postman/environments/Local_Development.postman_environment.json"
   },
   "keywords": [],
   "author": "",
