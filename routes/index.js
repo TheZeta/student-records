@@ -1,8 +1,12 @@
 const express = require('express');
+const createRecord = require('../controllers/createRecord');
+const updateRecord = require('../controllers/updateRecord');
+const validateRecord = require('../middleware/validateRecord');
+const averageGrades = require('../middleware/averageGrades');
+
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.send('Hello from the router!');
-});
+router.post('/', validateRecord, averageGrades, createRecord);
+router.put('/:stdNumber', validateRecord, averageGrades, updateRecord);
 
 module.exports = router;
