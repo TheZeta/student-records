@@ -30,7 +30,7 @@ const Record = sequelize.define('Record', {
       msg: 'This student number already exists'
     },
     validate: {
-      is: /^B\d{2}[A-Z]{2}\d{5}$/i,
+      is: /^B\d{3}X\d{5}$/i,
       notEmpty: true
     }
   },
