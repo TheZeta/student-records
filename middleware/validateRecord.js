@@ -11,11 +11,6 @@ const validateRecord = [
     .withMessage('Surname must contain only letters and spaces')
     .notEmpty()
     .withMessage('Surname is required'),
-  body('stdNumber')
-    .matches(/^B\d{3}X\d{5}$/)
-    .withMessage('Student number must follow the pattern B###X#####')
-    .notEmpty()
-    .withMessage('Student number is required'),
   body('grades').isArray().withMessage('Grades must be an array'),
   body('grades.*.code')
     .matches(/^[A-Z]{2}\d{3}$/)
@@ -27,6 +22,17 @@ const validateRecord = [
     .withMessage('Grade value must be an integer between 0 and 100')
     .notEmpty()
     .withMessage('Grade value is required'),
+  (req, res, next) => {
+    if (req.method === 'POST') {
+      body('stdNumber')
+        .matches(/^B\d{3}X\d{5}$/)
+        .withMessage('Student number must follow the pattern B###X#####')
+        .notEmpty()
+        .withMessage('Student number is required')(req, res, next);
+    } else {
+      next();
+    }
+  },
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
