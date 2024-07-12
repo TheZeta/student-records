@@ -1,0 +1,388 @@
+{
+	"info": {
+		"_postman_id": "e3532bbd-c107-4683-911e-d59e567a0068",
+		"name": "Main Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31205269"
+	},
+	"item": [
+		{
+			"name": "Create Valid Record",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let originalString = pm.collectionVariables.get('stdNumber');\r",
+							"\r",
+							"let pattern = /^B\\d{3}X\\d{5}$/;\r",
+							"\r",
+							"let match = originalString.match(/(\\d+)$/);\r",
+							"if (match) {\r",
+							"    let numericPart = match[1];\r",
+							"    let incrementedNumeric = parseInt(numericPart) + 1;\r",
+							"    let incrementedString = originalString.replace(/\\d+$/, incrementedNumeric.toString());\r",
+							"\r",
+							"    if (!pattern.test(incrementedString)) {\r",
+							"        console.log('Incremented number does not match the pattern');\r",
+							"        return;\r",
+							"    }\r",
+							"\r",
+							"    let existingBody = JSON.parse(pm.request.body.raw);\r",
+							"\r",
+							"    let updatedRequestBody = {\r",
+							"        ...existingBody,\r",
+							"        stdNumber: incrementedString,\r",
+							"    };\r",
+							"\r",
+							"    pm.request.body.raw = JSON.stringify(updatedRequestBody);\r",
+							"\r",
+							"    console.log('Updated JSON body:', pm.request.body.raw);\r",
+							"    pm.collectionVariables.set('stdNumber', incrementedString);\r",
+							"} else {\r",
+							"    console.log('String format not recognized');\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 201\", function () {\r",
+							"  pm.expect(pm.response.code).to.equal(201);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.message).to.exist;\r",
+							"    pm.expect(responseData.student).to.exist.and.to.be.an('object');\r",
+							"    pm.expect(responseData.student.id).to.exist;\r",
+							"    pm.expect(responseData.student.name).to.exist;\r",
+							"    pm.expect(responseData.student.surname).to.exist;\r",
+							"    pm.expect(responseData.student.stdNumber).to.exist;\r",
+							"    pm.expect(responseData.student.grades).to.exist.and.to.be.an('array');\r",
+							"    responseData.student.grades.forEach(function(grade) {\r",
+							"        pm.expect(grade.code).to.exist;\r",
+							"        pm.expect(grade.value).to.exist;\r",
+							"    });\r",
+							"    pm.expect(responseData.student.updatedAt).to.exist;\r",
+							"    pm.expect(responseData.student.createdAt).to.exist;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Grades are in a valid format\", function () {\r",
+							"  const responseData = pm.response.json();\r",
+							"\r",
+							"  pm.expect(responseData.student.grades).to.be.an('array');\r",
+							"  responseData.student.grades.forEach(function (grade) {\r",
+							"    pm.expect(grade).to.be.an('object');\r",
+							"    pm.expect(grade.code).to.be.a('string');\r",
+							"    pm.expect(grade.value).to.be.a('number');\r",
+							"  });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"John\",\r\n    \"surname\": \"Doe\",\r\n    \"stdNumber\": \"SCRIPT_GENERATED_VALUE\",\r\n    \"grades\": [\r\n        {\r\n            \"code\": \"MT101\",\r\n            \"value\": 90\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/records",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Invalid Record",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 400\", function () {\r",
+							"  pm.expect(pm.response.code).to.equal(400);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required fields - type, value, msg, path, and location\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.errors).to.be.an('array');\r",
+							"\r",
+							"    responseData.errors.forEach(function(error) {\r",
+							"        pm.expect(error.type).to.exist;\r",
+							"        pm.expect(error.value).to.exist;\r",
+							"        pm.expect(error.msg).to.exist;\r",
+							"        pm.expect(error.path).to.exist;\r",
+							"        pm.expect(error.location).to.exist;\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Content-Type is 'application/json'\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 500ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"John123\",\r\n    \"surname\": \"\",\r\n    \"stdNumber\": \"invalid student number\",\r\n    \"grades\": [\r\n        {\r\n            \"code\": \"MT101\",\r\n            \"value\": 900\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/records",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"records"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Valid Record",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.equal(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Record object schema is valid\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.record).to.be.an('object');\r",
+							"    pm.expect(responseData.record.id).to.be.a('string');\r",
+							"    pm.expect(responseData.record.name).to.be.a('string');\r",
+							"    pm.expect(responseData.record.surname).to.be.a('string');\r",
+							"    pm.expect(responseData.record.stdNumber).to.be.a('string');\r",
+							"    pm.expect(responseData.record.grades).to.be.an('array');\r",
+							"    pm.expect(responseData.record.createdAt).to.be.a('string');\r",
+							"    pm.expect(responseData.record.updatedAt).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Grades array should contain non-empty code and non-negative value fields\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData.record.grades).to.be.an('array');\r",
+							"    responseData.record.grades.forEach(function(grade) {\r",
+							"        pm.expect(grade.code).to.exist.and.to.be.a('string').and.to.have.lengthOf.at.least(1, \"Code should not be empty\");\r",
+							"        pm.expect(grade.value).to.exist.and.to.be.a('number').and.to.be.at.least(0, \"Value should be non-negative\");\r",
+							"    });\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Name and surname should be non-empty strings\", function () {\r",
+							"  const responseData = pm.response.json();\r",
+							"  \r",
+							"  pm.expect(responseData).to.be.an('object');\r",
+							"  pm.expect(responseData.record.name).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Name should not be empty\");\r",
+							"  pm.expect(responseData.record.surname).to.be.a('string').and.to.have.lengthOf.at.least(1, \"Surname should not be empty\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"John\",\r\n    \"surname\": \"Doe\",\r\n    \"grades\": [\r\n        {\r\n            \"code\": \"MT101\",\r\n            \"value\": 5\r\n        },\r\n        {\r\n            \"code\": \"MT101\",\r\n            \"value\": 55\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/records/B111X1112",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"records",
+						"B111X11112"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Non-Existent Record",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 404\", function () {\r",
+							"  pm.expect(pm.response.code).to.equal(404);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response has the required field 'error'\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    \r",
+							"    pm.expect(responseData).to.have.property('error');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response time is less than 200ms\", function () {\r",
+							"  pm.expect(pm.response.responseTime).to.be.below(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate the schema of the response JSON\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"\r",
+							"    pm.expect(responseData).to.be.an('object');\r",
+							"    pm.expect(responseData.error).to.be.a('string');\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Error message displays 'Student record not found'\", function () {\r",
+							"    const responseData = pm.response.json();\r",
+							"    pm.expect(responseData.error).to.equal('Student record not found');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"John\",\r\n    \"surname\": \"Doe\",\r\n    \"grades\": [\r\n        {\r\n            \"code\": \"MT101\",\r\n            \"value\": 5\r\n        },\r\n        {\r\n            \"code\": \"MT101\",\r\n            \"value\": 55\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/records/B111X11111",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"records",
+						"B111X11111"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "stdNumber",
+			"value": "B111X11111",
+			"type": "string"
+		}
+	]
+}
