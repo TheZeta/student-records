@@ -26,7 +26,9 @@ const Record = sequelize.define('Record', {
   stdNumber: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
+    unique: {
+      msg: 'This student number already exists'
+    },
     validate: {
       is: /^B\d{2}[A-Z]{2}\d{5}$/i,
       notEmpty: true
