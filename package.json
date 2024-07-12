@@ -15,7 +15,7 @@
   },
   "scripts": {
     "start": "node app.js",
-    "test": "newman run postman/collections/Initial_Collection.postman_collection.json -e postman/environments/Local_Development.postman_environment.json"
+    "test:postman": "newman run postman/collections/Main_Collection.postman_collection.json -e postman/environments/Local_Development.postman_environment.json"
   },
   "keywords": [],
   "author": "",
